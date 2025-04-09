@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { toast, Toaster as SonnerToaster, ToastProps as SonnerToastProps } from 'sonner';
+import { toast, Toaster as SonnerToaster, ToasterProps } from 'sonner';
 import { X } from 'lucide-react';
 
 export const CustomToaster = () => {
@@ -21,7 +21,7 @@ export const CustomToaster = () => {
   );
 };
 
-interface ToastProps extends Omit<SonnerToastProps, 'message'> {
+interface ToastProps extends Omit<React.ComponentProps<typeof toast>, 'message'> {
   message: string;
 }
 
