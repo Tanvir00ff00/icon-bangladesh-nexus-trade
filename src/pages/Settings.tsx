@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -7,10 +7,71 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
-import { Bell, Mail, Shield, User, Clipboard, Database } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Bell, Mail, Shield, User, Clipboard, Database, Download } from 'lucide-react';
+import { toast } from 'sonner';
 
 const Settings: React.FC = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  
+  // Settings state
+  const [language, setLanguage] = useState<string>('bn');
+  const [currency, setCurrency] = useState<string>('BDT');
+  const [dateFormat, setDateFormat] = useState<string>('DD/MM/YYYY');
+  const [timezone, setTimezone] = useState<string>('Asia/Dhaka');
+  
+  // Notification settings state
+  const [stockAlerts, setStockAlerts] = useState<boolean>(true);
+  const [emailNotifs, setEmailNotifs] = useState<boolean>(true);
+  const [lotEntryNotifs, setLotEntryNotifs] = useState<boolean>(false);
+  const [securityAlerts, setSecurityAlerts] = useState<boolean>(true);
+  
+  // System settings state
+  const [autoBackup, setAutoBackup] = useState<boolean>(true);
+  
+  const handleLanguageChange = (value: string) => {
+    setLanguage(value);
+    toast.success('ভাষা পরিবর্তন করা হয়েছে।');
+  };
+  
+  const handleCurrencyChange = (value: string) => {
+    setCurrency(value);
+    toast.success('কারেন্সি পরিবর্তন করা হয়েছে।');
+  };
+  
+  const handleDateFormatChange = (value: string) => {
+    setDateFormat(value);
+    toast.success('তারিখ ফরম্যাট পরিবর্তন করা হয়েছে।');
+  };
+  
+  const handleTimezoneChange = (value: string) => {
+    setTimezone(value);
+    toast.success('টাইমজোন পরিবর্তন করা হয়েছে।');
+  };
+  
+  const handleDownloadFullData = () => {
+    toast.success('ডাটা ডাউনলোড শুরু হয়েছে...');
+    // Normally this would trigger a real download from Google Sheets
+    setTimeout(() => {
+      toast.success('সম্পূর্ণ ডেটা ডাউনলোড সম্পন্ন হয়েছে।');
+    }, 2000);
+  };
+  
+  const handleDownloadMonthlyData = () => {
+    toast.success('এই মাসের ডেটা ডাউনলোড শুরু হয়েছে...');
+    // Normally this would trigger a real download from Google Sheets
+    setTimeout(() => {
+      toast.success('এই মাসের ডেটা ডাউনলোড সম্পন্ন হয়েছে।');
+    }, 1500);
+  };
+  
+  const handleChangeAPIKey = () => {
+    toast.info('API কি পরিবর্তনের জন্য অ্যাডমিনের সাথে যোগাযোগ করুন।');
+  };
+  
+  const handleLogout = () => {
+    logout();
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -80,9 +141,18 @@ const Settings: React.FC = () => {
                   <p className="text-sm text-gray-500">সিস্টেমের ভাষা পরিবর্তন করুন</p>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Button variant="outline">
-                    বাংলা
-                  </Button>
+                  <Select
+                    value={language}
+                    onValueChange={handleLanguageChange}
+                  >
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="ভাষা নির্বাচন করুন" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="bn">বাংলা</SelectItem>
+                      <SelectItem value="en">English</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
@@ -92,7 +162,7 @@ const Settings: React.FC = () => {
                   <p className="text-sm text-gray-500">সিস্টেম থেকে লগআউট করুন</p>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Button variant="destructive">
+                  <Button variant="destructive" onClick={handleLogout}>
                     লগআউট
                   </Button>
                 </div>
@@ -118,7 +188,7 @@ const Settings: React.FC = () => {
                   </Label>
                   <p className="text-sm text-gray-500">যখন পিস সংখ্যা ১০-এর নিচে নামবে তখন অ্যালার্ট পাবেন</p>
                 </div>
-                <Switch defaultChecked />
+                <Switch checked={stockAlerts} onCheckedChange={setStockAlerts} />
               </div>
 
               <div className="flex items-center justify-between">
@@ -129,7 +199,7 @@ const Settings: React.FC = () => {
                   </Label>
                   <p className="text-sm text-gray-500">সাপ্তাহিক রিপোর্ট ইমেইলে পাবেন</p>
                 </div>
-                <Switch defaultChecked />
+                <Switch checked={emailNotifs} onCheckedChange={setEmailNotifs} />
               </div>
 
               <div className="flex items-center justify-between">
@@ -140,7 +210,7 @@ const Settings: React.FC = () => {
                   </Label>
                   <p className="text-sm text-gray-500">যখন নতুন লট এন্ট্রি হবে তখন নোটিফিকেশন পাবেন</p>
                 </div>
-                <Switch />
+                <Switch checked={lotEntryNotifs} onCheckedChange={setLotEntryNotifs} />
               </div>
 
               <div className="flex items-center justify-between">
@@ -151,7 +221,7 @@ const Settings: React.FC = () => {
                   </Label>
                   <p className="text-sm text-gray-500">অ্যাকাউন্টে নতুন লগইন হলে নোটিফিকেশন পাবেন</p>
                 </div>
-                <Switch defaultChecked />
+                <Switch checked={securityAlerts} onCheckedChange={setSecurityAlerts} />
               </div>
             </CardContent>
           </Card>
@@ -168,17 +238,54 @@ const Settings: React.FC = () => {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="currency">ডিফল্ট কারেন্সি</Label>
-                <Input id="currency" value="৳ বাংলাদেশি টাকা (BDT)" readOnly />
+                <Select
+                  value={currency}
+                  onValueChange={handleCurrencyChange}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="কারেন্সি নির্বাচন করুন" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="BDT">৳ বাংলাদেশি টাকা (BDT)</SelectItem>
+                    <SelectItem value="USD">$ মার্কিন ডলার (USD)</SelectItem>
+                    <SelectItem value="EUR">€ ইউরো (EUR)</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="dateFormat">তারিখ ফরম্যাট</Label>
-                <Input id="dateFormat" value="DD/MM/YYYY" readOnly />
+                <Select
+                  value={dateFormat}
+                  onValueChange={handleDateFormatChange}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="তারিখ ফরম্যাট নির্বাচন করুন" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="DD/MM/YYYY">DD/MM/YYYY</SelectItem>
+                    <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
+                    <SelectItem value="YYYY-MM-DD">YYYY-MM-DD</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="timezone">টাইমজোন</Label>
-                <Input id="timezone" value="Asia/Dhaka (GMT+6)" readOnly />
+                <Select
+                  value={timezone}
+                  onValueChange={handleTimezoneChange}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="টাইমজোন নির্বাচন করুন" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Asia/Dhaka">Asia/Dhaka (GMT+6)</SelectItem>
+                    <SelectItem value="Asia/Kolkata">Asia/Kolkata (GMT+5:30)</SelectItem>
+                    <SelectItem value="Europe/London">Europe/London (GMT)</SelectItem>
+                    <SelectItem value="America/New_York">America/New_York (GMT-5)</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="flex items-center justify-between">
@@ -186,7 +293,7 @@ const Settings: React.FC = () => {
                   <Label className="text-base">অটো-ব্যাকআপ</Label>
                   <p className="text-sm text-gray-500">প্রতি ৭ দিন অন্তর সিস্টেম অটোমেটিক ব্যাকআপ নিবে</p>
                 </div>
-                <Switch defaultChecked />
+                <Switch checked={autoBackup} onCheckedChange={setAutoBackup} />
               </div>
             </CardContent>
           </Card>
@@ -209,11 +316,12 @@ const Settings: React.FC = () => {
                 </p>
 
                 <div className="flex flex-col space-y-2">
-                  <Button>
+                  <Button onClick={handleDownloadFullData}>
                     <Database className="mr-2 h-4 w-4" />
                     সম্পূর্ণ ডেটা ডাউনলোড করুন
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={handleDownloadMonthlyData}>
+                    <Download className="mr-2 h-4 w-4" />
                     শুধু এই মাসের ডেটা ডাউনলোড করুন
                   </Button>
                 </div>
@@ -265,7 +373,7 @@ const Settings: React.FC = () => {
                 <p className="text-sm text-gray-600 mb-4">
                   সিস্টেমে API কি গুলি নিরাপদে সংরক্ষিত আছে।
                 </p>
-                <Button variant="outline">
+                <Button variant="outline" onClick={handleChangeAPIKey}>
                   API কি পরিবর্তন করুন
                 </Button>
               </div>

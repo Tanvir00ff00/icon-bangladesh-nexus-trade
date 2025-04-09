@@ -34,6 +34,8 @@ export interface Sale {
 // Initialize the Google Sheets if it doesn't exist yet
 export const initializeGoogleSheet = async (accessToken: string) => {
   try {
+    console.log("Initializing Google Sheet with token:", accessToken?.substring(0, 10) + "...");
+    
     // First check if the spreadsheet exists and has the required sheets
     const response = await fetch(`${SHEETS_API_ENDPOINT}/${SPREADSHEET_ID}?fields=sheets.properties.title`, {
       headers: {
@@ -42,19 +44,33 @@ export const initializeGoogleSheet = async (accessToken: string) => {
     });
 
     if (!response.ok) {
+      console.error('Spreadsheet API response not OK:', response.status, response.statusText);
       if (response.status === 404) {
-        console.error('Spreadsheet not found');
+        toast.error('গুগল শিট খুঁজে পাওয়া যায়নি। স্প্রেডশিট আইডি চেক করুন।');
         return false;
       }
-      throw new Error(`Error ${response.status}: ${await response.text()}`);
+      const errorText = await response.text();
+      console.error(`Error details: ${errorText}`);
+      toast.error('গুগল শিট সেটআপ করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+      throw new Error(`Error ${response.status}: ${errorText}`);
     }
 
     const data = await response.json();
+    console.log("Sheets data:", data);
+    
+    if (!data.sheets || !Array.isArray(data.sheets)) {
+      console.error('Unexpected sheets data format:', data);
+      toast.error('গুগল শিট ডেটা ফরম্যাট অপ্রত্যাশিত। আবার চেষ্টা করুন।');
+      return false;
+    }
+    
     const existingSheets = data.sheets.map((sheet: any) => sheet.properties.title);
+    console.log("Existing sheets:", existingSheets);
     
     // Define the sheets we need
     const requiredSheets = ['Lots', 'Sales', 'Inventory', 'Config'];
     const sheetsToCreate = requiredSheets.filter(sheet => !existingSheets.includes(sheet));
+    console.log("Sheets to create:", sheetsToCreate);
     
     // Create missing sheets
     if (sheetsToCreate.length > 0) {
@@ -84,6 +100,8 @@ export const initializeGoogleSheet = async (accessToken: string) => {
       // Initialize config with last IDs
       await addRowToSheet(accessToken, 'Config', ['LastLotID', 'LOT-000']);
       await addRowToSheet(accessToken, 'Config', ['LastSaleID', 'SALE-000']);
+      
+      toast.success('গুগল শিট সফলভাবে সেটআপ করা হয়েছে।');
     }
     
     return true;
@@ -96,6 +114,7 @@ export const initializeGoogleSheet = async (accessToken: string) => {
 
 const createSheet = async (accessToken: string, title: string) => {
   try {
+    console.log(`Creating sheet: ${title}`);
     const response = await fetch(`${SHEETS_API_ENDPOINT}/${SPREADSHEET_ID}:batchUpdate`, {
       method: 'POST',
       headers: {
@@ -116,10 +135,14 @@ const createSheet = async (accessToken: string, title: string) => {
     });
 
     if (!response.ok) {
-      throw new Error(`Error creating sheet: ${await response.text()}`);
+      const errorText = await response.text();
+      console.error(`Error creating sheet ${title}:`, response.status, errorText);
+      throw new Error(`Error creating sheet: ${errorText}`);
     }
 
-    return await response.json();
+    const result = await response.json();
+    console.log(`Sheet created successfully:`, result);
+    return result;
   } catch (error) {
     console.error(`Failed to create sheet ${title}:`, error);
     throw error;
@@ -128,6 +151,7 @@ const createSheet = async (accessToken: string, title: string) => {
 
 const setupSheetHeaders = async (accessToken: string, sheetName: string, headers: string[]) => {
   try {
+    console.log(`Setting up headers for ${sheetName}:`, headers);
     const response = await fetch(`${SHEETS_API_ENDPOINT}/${SPREADSHEET_ID}/values/${sheetName}!A1:${String.fromCharCode(65 + headers.length - 1)}1?valueInputOption=RAW`, {
       method: 'PUT',
       headers: {
@@ -140,10 +164,14 @@ const setupSheetHeaders = async (accessToken: string, sheetName: string, headers
     });
 
     if (!response.ok) {
-      throw new Error(`Error setting up headers: ${await response.text()}`);
+      const errorText = await response.text();
+      console.error(`Error setting up headers for ${sheetName}:`, response.status, errorText);
+      throw new Error(`Error setting up headers: ${errorText}`);
     }
 
-    return await response.json();
+    const result = await response.json();
+    console.log(`Headers set up successfully for ${sheetName}:`, result);
+    return result;
   } catch (error) {
     console.error(`Failed to set headers for ${sheetName}:`, error);
     throw error;
@@ -153,6 +181,7 @@ const setupSheetHeaders = async (accessToken: string, sheetName: string, headers
 // Get the next ID (LOT-XXX or SALE-XXX)
 export const getNextId = async (accessToken: string, type: 'LOT' | 'SALE') => {
   try {
+    console.log(`Getting next ${type} ID`);
     const configKey = type === 'LOT' ? 'LastLotID' : 'LastSaleID';
     
     // Get the current ID from Config sheet
@@ -163,14 +192,18 @@ export const getNextId = async (accessToken: string, type: 'LOT' | 'SALE') => {
     });
 
     if (!response.ok) {
-      throw new Error(`Error fetching config: ${await response.text()}`);
+      const errorText = await response.text();
+      console.error(`Error fetching config:`, response.status, errorText);
+      throw new Error(`Error fetching config: ${errorText}`);
     }
 
     const data = await response.json();
+    console.log(`Config data:`, data);
     const rows = data.values || [];
     let lastIdRow = rows.find((row: string[]) => row[0] === configKey);
     
     if (!lastIdRow) {
+      console.log(`${configKey} not found in config, creating it`);
       // If config doesn't exist, create it
       await addRowToSheet(accessToken, 'Config', [configKey, `${type}-000`]);
       lastIdRow = [configKey, `${type}-000`];
@@ -178,9 +211,11 @@ export const getNextId = async (accessToken: string, type: 'LOT' | 'SALE') => {
     
     // Parse the current ID and increment
     const lastId = lastIdRow[1];
+    console.log(`Last ${type} ID:`, lastId);
     const currentNumber = parseInt(lastId.split('-')[1], 10);
     const nextNumber = currentNumber + 1;
     const nextId = `${type}-${nextNumber.toString().padStart(3, '0')}`;
+    console.log(`Next ${type} ID:`, nextId);
     
     // Update the config with the new ID
     await updateConfigValue(accessToken, configKey, nextId);

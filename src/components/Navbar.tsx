@@ -1,86 +1,83 @@
 
 import React from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { Menu, User, LogOut, Bell } from 'lucide-react';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuLabel, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { MoonIcon, SunIcon, MenuIcon } from 'lucide-react';
+import { useTheme } from 'next-themes';
+import { useMobile } from '@/hooks/use-mobile';
+import { useAuth } from '@/contexts/AuthContext';
 
-const Navbar: React.FC = () => {
+interface NavbarProps {
+  toggleSidebar: () => void;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
+  const { theme, setTheme } = useTheme();
+  const isMobile = useMobile();
   const { user, logout } = useAuth();
-  
-  const handleLogout = () => {
-    logout();
-  };
 
-  const toggleSidebar = () => {
-    // For mobile sidebar toggle
-    const sidebar = document.getElementById('sidebar');
-    if (sidebar) {
-      sidebar.classList.toggle('translate-x-0');
-      sidebar.classList.toggle('-translate-x-full');
-    }
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
   return (
-    <header className="bg-white border-b border-gray-200 shadow-sm py-2 px-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="md:hidden"
-            onClick={toggleSidebar}
-          >
-            <Menu className="h-6 w-6" />
-          </Button>
-          <div className="flex items-center">
+    <header className="sticky top-0 z-30 w-full border-b bg-background">
+      <div className="flex h-16 items-center px-4 md:px-6">
+        <div className="flex items-center gap-2">
+          {isMobile && (
+            <Button variant="ghost" size="icon" onClick={toggleSidebar} className="mr-2">
+              <MenuIcon className="h-5 w-5" />
+              <span className="sr-only">Toggle Menu</span>
+            </Button>
+          )}
+          <div className="flex items-center gap-2">
             <img 
-              src="https://via.placeholder.com/40/006A4E?text=IB" 
-              alt="আইকন বাংলাদেশ" 
-              className="h-8 w-8 mr-2"
+              src="/lovable-uploads/aa065400-b821-4e2f-b88e-fda0f76a5719.png" 
+              alt="আইকন বাংলাদেশ লোগো" 
+              className="h-9 w-auto"
             />
-            <h1 className="text-xl font-semibold text-bangladesh-green hidden md:block">
-              আইকন বাংলাদেশ
-            </h1>
+            <span className="hidden font-bold md:inline-block">আইকন বাংলাদেশ</span>
           </div>
         </div>
-
-        <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="h-5 w-5" />
-            <span className="absolute top-0 right-0 h-2 w-2 bg-bangladesh-red rounded-full"></span>
+        
+        <div className="ml-auto flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label="Toggle Theme"
+            className="mr-2"
+            onClick={toggleTheme}
+          >
+            {theme === 'dark' ? (
+              <SunIcon className="h-5 w-5" />
+            ) : (
+              <MoonIcon className="h-5 w-5" />
+            )}
+            <span className="sr-only">Toggle theme</span>
           </Button>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={user?.picture} alt={user?.name} />
-                  <AvatarFallback>{user?.name?.charAt(0) || 'U'}</AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end">
-              <DropdownMenuLabel>আমার অ্যাকাউন্ট</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="flex items-center">
-                <User className="mr-2 h-4 w-4" />
-                <span>{user?.name}</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleLogout} className="flex items-center text-bangladesh-red">
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>লগ আউট</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {user ? (
+            <div className="flex items-center gap-2">
+              <div className="hidden md:block text-right">
+                <div className="text-sm font-medium">{user.name}</div>
+                <div className="text-xs text-gray-500">{user.email}</div>
+              </div>
+              {user.picture ? (
+                <img
+                  src={user.picture}
+                  alt={user.name}
+                  className="h-8 w-8 rounded-full object-cover"
+                />
+              ) : (
+                <div className="h-8 w-8 rounded-full bg-bangladesh-green text-white flex items-center justify-center">
+                  {user.name?.charAt(0) || 'U'}
+                </div>
+              )}
+            </div>
+          ) : (
+            <Button size="sm" variant="outline">
+              লগইন
+            </Button>
+          )}
         </div>
       </div>
     </header>
