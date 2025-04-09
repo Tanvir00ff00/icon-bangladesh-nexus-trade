@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getAllLots, Lot, initializeGoogleSheet } from '@/services/googleSheetService';
-import { toast } from '@/components/ui/sonner';
+import { toast } from "sonner";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';

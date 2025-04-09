@@ -1,5 +1,5 @@
 
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
 // Function to handle file uploads using Base64 (client-side only approach)
 // In a real implementation, we would use Google Drive API to store images

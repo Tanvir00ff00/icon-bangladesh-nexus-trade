@@ -1,5 +1,5 @@
 
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
 // Google Sheets API endpoint
 const SHEETS_API_ENDPOINT = 'https://sheets.googleapis.com/v4/spreadsheets';
