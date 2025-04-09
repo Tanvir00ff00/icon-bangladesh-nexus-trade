@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { MoonIcon, SunIcon, MenuIcon } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { useMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface NavbarProps {
@@ -12,7 +12,7 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
   const { theme, setTheme } = useTheme();
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
   const { user, logout } = useAuth();
 
   const toggleTheme = () => {

@@ -61,7 +61,7 @@ const Sidebar: React.FC = () => {
     >
       <div className="p-4 flex items-center border-b border-gray-200">
         <img 
-          src="https://via.placeholder.com/40/006A4E?text=IB" 
+          src="/lovable-uploads/aa065400-b821-4e2f-b88e-fda0f76a5719.png" 
           alt="আইকন বাংলাদেশ" 
           className="h-8 w-8 mr-2"
         />
