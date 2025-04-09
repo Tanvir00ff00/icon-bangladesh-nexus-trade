@@ -80,6 +80,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         callback: handleCredentialResponse,
         auto_select: false,
         cancel_on_tap_outside: true,
+        scope: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file',
       });
       window.google.accounts.id.prompt();
     } else {

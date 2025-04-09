@@ -36,7 +36,39 @@ export const initializeGoogleSheet = async (accessToken: string) => {
   try {
     console.log("Initializing Google Sheet with token:", accessToken?.substring(0, 10) + "...");
     
-    // First check if the spreadsheet exists and has the required sheets
+    // First try to create the spreadsheet if it doesn't exist
+    try {
+      const createResponse = await fetch('https://sheets.googleapis.com/v4/spreadsheets', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          properties: {
+            title: 'আইকন বাংলাদেশ ইনভেন্টরি',
+          },
+          sheets: [
+            { properties: { title: 'Lots' } },
+            { properties: { title: 'Sales' } },
+            { properties: { title: 'Inventory' } },
+            { properties: { title: 'Config' } },
+          ]
+        }),
+      });
+      
+      if (createResponse.ok) {
+        const data = await createResponse.json();
+        console.log("Created new spreadsheet:", data);
+        // Update our spreadsheet ID with the newly created one
+        toast.success('নতুন গুগল শিট সফলভাবে তৈরি করা হয়েছে।');
+        return true;
+      }
+    } catch (error) {
+      console.log("Could not create new spreadsheet, trying to use existing one", error);
+    }
+    
+    // Then check if the spreadsheet exists and has the required sheets
     const response = await fetch(`${SHEETS_API_ENDPOINT}/${SPREADSHEET_ID}?fields=sheets.properties.title`, {
       headers: {
         'Authorization': `Bearer ${accessToken}`,
@@ -47,6 +79,10 @@ export const initializeGoogleSheet = async (accessToken: string) => {
       console.error('Spreadsheet API response not OK:', response.status, response.statusText);
       if (response.status === 404) {
         toast.error('গুগল শিট খুঁজে পাওয়া যায়নি। স্প্রেডশিট আইডি চেক করুন।');
+        return false;
+      }
+      if (response.status === 401 || response.status === 403) {
+        toast.error('গুগল শিট অ্যাক্সেস করার অনুমতি নেই। অনুগ্রহ করে আবার লগইন করুন।');
         return false;
       }
       const errorText = await response.text();
@@ -192,8 +228,24 @@ export const getNextId = async (accessToken: string, type: 'LOT' | 'SALE') => {
     });
 
     if (!response.ok) {
+      // Check for authorization issues
+      if (response.status === 401 || response.status === 403) {
+        toast.error('গুগল শিট অ্যাক্সেস করার অনুমতি নেই। অনুগ্রহ করে আবার লগইন করুন।');
+        throw new Error('Authorization failed');
+      }
+      
       const errorText = await response.text();
       console.error(`Error fetching config:`, response.status, errorText);
+      
+      // If config sheet doesn't exist, create it
+      if (response.status === 404) {
+        console.log("Config sheet not found, creating it");
+        await createSheet(accessToken, 'Config');
+        await setupSheetHeaders(accessToken, 'Config', ['সেটিং নাম', 'মান']);
+        await addRowToSheet(accessToken, 'Config', [configKey, `${type}-000`]);
+        return `${type}-001`;
+      }
+      
       throw new Error(`Error fetching config: ${errorText}`);
     }
 
