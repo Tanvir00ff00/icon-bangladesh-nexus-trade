@@ -25,11 +25,13 @@ const Login: React.FC = () => {
       <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-lg">
         <div className="text-center">
           <div className="flex justify-center">
-            <div className="h-20 w-20 rounded-full bg-bangladesh-green flex items-center justify-center">
-              <span className="text-white text-3xl font-bold">আই</span>
-            </div>
+            <img 
+              src="/lovable-uploads/aa065400-b821-4e2f-b88e-fda0f76a5719.png" 
+              alt="আইকন বাংলাদেশ লোগো" 
+              className="h-24 w-auto mb-2"
+            />
           </div>
-          <h1 className="mt-6 text-3xl font-bold text-gray-900">আইকন বাংলাদেশ</h1>
+          <h1 className="mt-4 text-3xl font-bold text-gray-900">আইকন বাংলাদেশ</h1>
           <p className="mt-2 text-gray-600">গার্মেন্টস ব্যবসার ইনভেন্টরি ম্যানেজমেন্ট সিস্টেম</p>
         </div>
         

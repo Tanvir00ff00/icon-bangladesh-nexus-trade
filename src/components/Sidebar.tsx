@@ -9,9 +9,10 @@ import {
   BarChart3, 
   Settings, 
   Layers, 
-  FileText, 
-  Home 
+  FileText,
+  LogOut
 } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const navItems = [
   {
@@ -53,12 +54,10 @@ const navItems = [
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
+  const { logout } = useAuth();
   
   return (
-    <aside 
-      id="sidebar"
-      className="w-64 bg-white border-r border-gray-200 h-screen sticky top-0 transition-transform -translate-x-full md:translate-x-0 overflow-y-auto"
-    >
+    <div className="h-full flex flex-col bg-white border-r border-gray-200 overflow-y-auto">
       <div className="p-4 flex items-center border-b border-gray-200">
         <img 
           src="/lovable-uploads/aa065400-b821-4e2f-b88e-fda0f76a5719.png" 
@@ -68,7 +67,7 @@ const Sidebar: React.FC = () => {
         <h2 className="text-lg font-semibold text-bangladesh-green">আইকন বাংলাদেশ</h2>
       </div>
       
-      <nav className="p-4">
+      <nav className="flex-1 p-4">
         <ul className="space-y-1">
           {navItems.map((item, index) => (
             <li key={index}>
@@ -77,7 +76,7 @@ const Sidebar: React.FC = () => {
                 className={cn(
                   "flex items-center py-2 px-4 rounded-md transition-colors",
                   {
-                    "bg-bangladesh-green text-white": location.pathname === item.href,
+                    "bg-bangladesh-green text-white hover:bg-bangladesh-green/90": location.pathname === item.href,
                     "text-gray-700 hover:bg-gray-100": location.pathname !== item.href,
                   }
                 )}
@@ -91,10 +90,17 @@ const Sidebar: React.FC = () => {
       </nav>
       
       <div className="p-4 mt-auto border-t border-gray-200">
-        <div className="text-xs text-gray-500 mb-2">ভার্শন ১.০</div>
+        <button
+          onClick={logout}
+          className="flex items-center w-full py-2 px-4 rounded-md text-gray-700 hover:bg-gray-100 transition-colors"
+        >
+          <LogOut className="h-5 w-5 mr-3" />
+          <span>লগআউট</span>
+        </button>
+        <div className="text-xs text-gray-500 mt-4 mb-2">ভার্শন ১.০</div>
         <div className="text-xs text-gray-500">© ২০২৫ আইকন বাংলাদেশ</div>
       </div>
-    </aside>
+    </div>
   );
 };
 

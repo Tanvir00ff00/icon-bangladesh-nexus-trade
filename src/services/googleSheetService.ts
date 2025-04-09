@@ -1,5 +1,5 @@
-
 import { toast } from "sonner";
+import { customToast } from "@/components/ui/custom-toast";
 
 // Google Sheets API endpoint
 const SHEETS_API_ENDPOINT = 'https://sheets.googleapis.com/v4/spreadsheets';
@@ -61,7 +61,7 @@ export const initializeGoogleSheet = async (accessToken: string) => {
         const data = await createResponse.json();
         console.log("Created new spreadsheet:", data);
         // Update our spreadsheet ID with the newly created one
-        toast.success('নতুন গুগল শিট সফলভাবে তৈরি করা হয়েছে।');
+        customToast.success('নতুন গুগল শিট সফলভাবে তৈরি করা হয়েছে।');
         return true;
       }
     } catch (error) {
@@ -78,16 +78,16 @@ export const initializeGoogleSheet = async (accessToken: string) => {
     if (!response.ok) {
       console.error('Spreadsheet API response not OK:', response.status, response.statusText);
       if (response.status === 404) {
-        toast.error('গুগল শিট খুঁজে পাওয়া যায়নি। স্প্রেডশিট আইডি চেক করুন।');
+        customToast.error('গুগল শিট খুঁজে পাওয়া যায়নি। স্প্রেডশিট আইডি চেক করুন।');
         return false;
       }
       if (response.status === 401 || response.status === 403) {
-        toast.error('গুগল শিট অ্যাক্সেস করার অনুমতি নেই। অনুগ্রহ করে আবার লগইন করুন।');
+        customToast.error('গুগল শিট অ্যাক্সেস করার অনুমতি নেই। অনুগ্রহ করে আবার লগইন করুন।');
         return false;
       }
       const errorText = await response.text();
       console.error(`Error details: ${errorText}`);
-      toast.error('গুগল শিট সেটআপ করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+      customToast.error('গুগল শিট সেটআপ করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
       throw new Error(`Error ${response.status}: ${errorText}`);
     }
 
@@ -96,7 +96,7 @@ export const initializeGoogleSheet = async (accessToken: string) => {
     
     if (!data.sheets || !Array.isArray(data.sheets)) {
       console.error('Unexpected sheets data format:', data);
-      toast.error('গুগল শিট ডেটা ফরম্যাট অপ্রত্যাশিত। আবার চেষ্টা করুন।');
+      customToast.error('গুগল শিট ডেটা ফরম্যাট অপ্রত্যাশিত। আবার চেষ্টা করুন।');
       return false;
     }
     
@@ -137,13 +137,13 @@ export const initializeGoogleSheet = async (accessToken: string) => {
       await addRowToSheet(accessToken, 'Config', ['LastLotID', 'LOT-000']);
       await addRowToSheet(accessToken, 'Config', ['LastSaleID', 'SALE-000']);
       
-      toast.success('গুগল শিট সফলভাবে সেটআপ করা হয়েছে।');
+      customToast.success('গুগল শিট সফলভাবে সেটআপ করা হয়েছে।');
     }
     
     return true;
   } catch (error) {
     console.error('Failed to initialize Google Sheet:', error);
-    toast.error('গুগল শিট সেটআপ করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+    customToast.error('গুগল শিট সেটআপ করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
     return false;
   }
 };
@@ -230,7 +230,7 @@ export const getNextId = async (accessToken: string, type: 'LOT' | 'SALE') => {
     if (!response.ok) {
       // Check for authorization issues
       if (response.status === 401 || response.status === 403) {
-        toast.error('গুগল শিট অ্যাক্সেস করার অনুমতি নেই। অনুগ্রহ করে আবার লগইন করুন।');
+        customToast.error('গুগল শিট অ্যাক্সেস করার অনুমতি নেই। অনুগ্রহ করে আবার লগইন করুন।');
         throw new Error('Authorization failed');
       }
       
@@ -275,7 +275,7 @@ export const getNextId = async (accessToken: string, type: 'LOT' | 'SALE') => {
     return nextId;
   } catch (error) {
     console.error(`Failed to get next ${type} ID:`, error);
-    toast.error(`নতুন ${type} আইডি তৈরি করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।`);
+    customToast.error(`নতুন ${type} আইডি তৈরি করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।`);
     throw error;
   }
 };
@@ -365,7 +365,7 @@ export const addRowToSheet = async (accessToken: string, sheetName: string, rowD
     return await response.json();
   } catch (error) {
     console.error(`Failed to add row to ${sheetName}:`, error);
-    toast.error('ডেটা সংরক্ষণ করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+    customToast.error('ডেটা সংরক্ষণ করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
     throw error;
   }
 };
@@ -400,7 +400,7 @@ export const getAllLots = async (accessToken: string): Promise<Lot[]> => {
     }));
   } catch (error) {
     console.error('Failed to fetch lots:', error);
-    toast.error('লট তথ্য লোড করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+    customToast.error('লট তথ্য লোড করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
     return [];
   }
 };
@@ -435,7 +435,7 @@ export const getAllSales = async (accessToken: string): Promise<Sale[]> => {
     }));
   } catch (error) {
     console.error('Failed to fetch sales:', error);
-    toast.error('বিক্রয় তথ্য লোড করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+    customToast.error('বিক্রয় তথ্য লোড করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
     return [];
   }
 };
@@ -476,11 +476,11 @@ export const addLot = async (
       entryDate
     ]);
     
-    toast.success('নতুন লট সফলভাবে সংরক্ষণ করা হয়েছে।');
+    customToast.success('নতুন লট সফলভাবে সংরক্ষণ করা হয়েছে।');
     return lotId;
   } catch (error) {
     console.error('Failed to add lot:', error);
-    toast.error('লট সংরক্ষণ করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+    customToast.error('লট সংরক্ষণ করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
     throw error;
   }
 };
@@ -501,12 +501,12 @@ export const addSale = async (
     const lot = lots.find(l => l.lotId === lotId);
     
     if (!lot) {
-      toast.error('লট খুঁজে পাওয়া যায়নি।');
+      customToast.error('লট খুঁজে পাওয়া যায়নি।');
       throw new Error('Lot not found');
     }
     
     if (lot.remainingPieces < pieces) {
-      toast.error(`পর্যাপ্ত পিস নেই। অবশিষ্ট পিস: ${lot.remainingPieces}`);
+      customToast.error(`পর্যাপ্ত পিস নেই। অবশিষ্ট পিস: ${lot.remainingPieces}`);
       throw new Error('Not enough pieces remaining');
     }
     
@@ -534,14 +534,14 @@ export const addSale = async (
     // Update the inventory sheet
     await updateInventoryAfterSale(accessToken, lotId, pieces);
     
-    toast.success('নতুন বিক্রয় সফলভাবে সংরক্ষণ করা হয়েছে।');
+    customToast.success('নতুন বিক্রয় সফলভাবে সংরক্ষণ করা হয়েছে।');
     return saleId;
   } catch (error) {
     console.error('Failed to add sale:', error);
     if (error instanceof Error && error.message === 'Not enough pieces remaining') {
       // Already showed toast in the check above
     } else {
-      toast.error('বিক্রয় সংরক্ষণ করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+      customToast.error('বিক্রয় সংরক্ষণ করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
     }
     throw error;
   }
@@ -704,7 +704,7 @@ export const getDashboardStats = async (accessToken: string) => {
     };
   } catch (error) {
     console.error('Failed to get dashboard stats:', error);
-    toast.error('ড্যাশবোর্ড তথ্য লোড করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+    customToast.error('ড্যাশবোর্ড তথ্য লোড করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
     throw error;
   }
 };

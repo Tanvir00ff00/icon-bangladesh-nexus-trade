@@ -1,6 +1,8 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { toast } from "sonner";
+import { customToast } from "@/components/ui/custom-toast";
+import { initializeGoogleSheet } from "@/services/googleSheetService";
 
 interface User {
   id: string;
@@ -42,7 +44,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       try {
         const storedUser = localStorage.getItem('icon_bangladesh_user');
         if (storedUser) {
-          setUser(JSON.parse(storedUser));
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser);
+          
+          // Try to initialize Google Sheet with the stored token
+          initializeGoogleSheet(parsedUser.accessToken).catch(err => {
+            console.error("Failed to initialize Google Sheet with stored token:", err);
+          });
         }
       } catch (error) {
         console.error('Failed to restore auth session:', error);
@@ -84,7 +92,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       });
       window.google.accounts.id.prompt();
     } else {
-      toast.error('Google Auth API not loaded yet. Please try again in a moment.');
+      customToast.error('Google Auth API not loaded yet. Please try again in a moment.');
     }
   };
 
@@ -108,10 +116,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       
       setUser(userObj);
       localStorage.setItem('icon_bangladesh_user', JSON.stringify(userObj));
-      toast.success('সফলভাবে লগইন হয়েছে');
+      
+      // Initialize Google Sheet after login
+      try {
+        await initializeGoogleSheet(token);
+      } catch (error) {
+        console.error("Failed to initialize Google Sheet after login:", error);
+        customToast.warning('গুগল শিট অ্যাক্সেস করতে সমস্যা হয়েছে। অনুগ্রহ করে লগআউট করে আবার লগইন করুন।');
+      }
+      
+      customToast.success('সফলভাবে লগইন হয়েছে');
     } catch (error) {
       console.error('Login error:', error);
-      toast.error('লগইন করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+      customToast.error('লগইন করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
     } finally {
       setIsLoading(false);
     }
@@ -120,7 +137,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('icon_bangladesh_user');
-    toast.success('সফলভাবে লগআউট হয়েছে');
+    customToast.success('সফলভাবে লগআউট হয়েছে');
   };
 
   return (

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { MoonIcon, SunIcon, MenuIcon } from 'lucide-react';
+import { MoonIcon, SunIcon, MenuIcon, X } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/contexts/AuthContext';
@@ -20,7 +20,7 @@ const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
   };
 
   return (
-    <header className="sticky top-0 z-30 w-full border-b bg-background">
+    <header className="sticky top-0 z-10 w-full border-b bg-background shadow-sm">
       <div className="flex h-16 items-center px-4 md:px-6">
         <div className="flex items-center gap-2">
           {isMobile && (
